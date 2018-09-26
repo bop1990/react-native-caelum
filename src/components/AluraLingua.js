@@ -7,10 +7,10 @@ export default class AluraLingua extends Component {
 
         return(
             <View>
-                <Image source={require('../../resources/img/aluraLingua.jpg')}/>
                 <TouchableOpacity title='Aprenda Inglês'>
                     <Text>Aprenda Inglês</Text>
                 </TouchableOpacity>
+                <Image source={require('../../resources/img/aluraLingua.jpg')}/>
             </View>
         );
     }

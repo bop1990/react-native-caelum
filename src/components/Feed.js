@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AsyncStorage,Dimensions, FlatList, StyleSheet,View,Button } from 'react-native';
+import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import Post from './Post';
 
 const width = Dimensions.get('screen').width;
@@ -38,27 +38,46 @@ export default class Feed extends Component {
     }
 
     like = (idFoto) => {
-        let novaLista = [];
-
         const foto = this.buscaPorId(this.state.fotos, idFoto);
 
-        if (!foto.likeada) {
-            novaLista = [...foto.likers,
-            { login: 'meuUsuario' }];
-        } else {
-            novaLista = foto.likers.filter(liker => {
-                return liker.login !== 'meuUsuario';
-            });
-        }
+        AsyncStorage.getItem('usuario')
+            .then(usuarioLogado => {
+                let novaLista = [];
 
-        const fotoAtualizada = {
-            ...foto,
-            likeada: !foto.likeada,
-            likers: novaLista
-        }
-        
-        const fotos = this.atualizaFotos(this.state.fotos, fotoAtualizada);
-        this.setState({fotos});
+                if (!foto.likeada) {
+                    novaLista = [...foto.likers,
+                    { login: usuarioLogado }];
+                } else {
+                    novaLista = foto.likers.filter(liker => {
+                        return liker.login !== usuarioLogado;
+                    });
+                }
+
+                return novaLista;
+            })
+            .then(novaLista => {
+                const fotoAtualizada = {
+                    ...foto,
+                    likeada: !foto.likeada,
+                    likers: novaLista
+                }
+                
+                const fotos = this.atualizaFotos(this.state.fotos, fotoAtualizada);
+                this.setState({fotos});
+            });
+
+        const uri = `https://instalura-api.herokuapp.com/api/fotos/${idFoto}/like`;
+
+        AsyncStorage.getItem('token')
+            .then(token => {
+                return{
+                    method: 'POST',
+                    headers: new Headers({
+                        'X-AUTH-TOKEN': token
+                    })
+                }
+            })
+            .then(requestInfo => fetch(uri, requestInfo));
     }
 
     adicionaComentario = (idFoto, valorComentario, inputComentario) =>{
