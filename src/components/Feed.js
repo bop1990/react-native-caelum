@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dimensions, FlatList, StyleSheet } from 'react-native';
+import { AsyncStorage,Dimensions, FlatList, StyleSheet,View,Button } from 'react-native';
 import Post from './Post';
 
 const width = Dimensions.get('screen').width;
@@ -13,18 +13,28 @@ export default class Feed extends Component {
         }
     }
 
-    async apiFetch(){
-        const resposta = await fetch('https://instalura-api.herokuapp.com/api/public/fotos/rafael');
-        const json = await resposta.json();
-        this.setState({fotos: json});
-    }
+    // async apiFetch(){
+    //     const resposta = await fetch('https://instalura-api.herokuapp.com/api/public/fotos/rafael');
+    //     const json = await resposta.json();
+    //     this.setState({fotos: json});
+    // }
 
     componentDidMount(){
-        // fetch('https://instalura-api.herokuapp.com/api/public/fotos/rafael')
-        //     .then(resposta => resposta.json())
-        // .then(json => this.setState({fotos: json}));
+        const uri = 'https://instalura-api.herokuapp.com/api/fotos';
+
+        AsyncStorage.getItem('token')
+            .then(token => {
+                return{
+                    headers: new Headers({
+                        'X-AUTH-TOKEN': token
+                    })
+                }
+            })
+            .then(requestInfo => fetch(uri, requestInfo))
+            .then(resposta => resposta.json())
+            .then(json => this.setState({fotos: json}));
         
-        this.apiFetch();
+        // this.apiFetch();
     }
 
     like = (idFoto) => {
@@ -85,15 +95,25 @@ export default class Feed extends Component {
     render(){
 
         return(
-            <FlatList style={styles.container}
-                keyExtractor={item => String(item.id)}
-                data={this.state.fotos}
-                 renderItem={ ({item}) => 
-                <Post foto={item} likeCallback={this.like}
-                    comentarioCallback={this.adicionaComentario}
+            <View>
+                <Button title='Modal'
+                    onPress={()=> {
+                        this.props.navigator.showModal({
+                            screen: 'AluraLingua',
+                            title: 'AluraLingua'
+                        })
+                    }}
                 />
-                }
-            />
+                <FlatList style={styles.container}
+                    keyExtractor={item => String(item.id)}
+                    data={this.state.fotos}
+                    renderItem={ ({item}) => 
+                    <Post foto={item} likeCallback={this.like}
+                        comentarioCallback={this.adicionaComentario}
+                    />
+                    }
+                />
+            </View>
         );
     }
 }
