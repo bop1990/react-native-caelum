@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import Post from './Post';
 import InstaluraFetchService from './../services/InstaluraFetchService';
+import Notificacao from '../api/Notificacao';
 
 const width = Dimensions.get('screen').width;
 
@@ -24,7 +25,8 @@ export default class Feed extends Component {
          // this.apiFetch();
 
         InstaluraFetchService.get('/fotos')
-            .then(json => this.setState({fotos: json}));
+            .then(json => this.setState({fotos: json}))
+            .catch(e => Notificacao.exibe('','Opsss... algo deu errado'));
     }
 
     like = (idFoto) => {
@@ -57,6 +59,8 @@ export default class Feed extends Component {
             });
 
         InstaluraFetchService.post(`/fotos/${idFoto}/like`);
+            
+
     }
 
     adicionaComentario = (idFoto, valorComentario, inputComentario) =>{
@@ -64,10 +68,6 @@ export default class Feed extends Component {
             return;
 
         const foto = this.buscaPorId(this.state.fotos, idFoto);
-
-        // const comentario = {
-        //     texto: valorComentario
-        // }
 
         InstaluraFetchService.post(`/fotos/${idFoto}/comment`, valorComentario)
             .then(comentario => [...foto.comentarios, comentario])
@@ -96,6 +96,16 @@ export default class Feed extends Component {
 
         return(
             <View>
+                <Button title='Logout'
+                    onPress={()=> {
+                        AsyncStorage.removeItem('token');
+                        AsyncStorage.removeItem('usuario');
+                        this.props.navigator.resetTo({
+                            screen: 'Login',
+                            title: 'Login'
+                        });
+                    }}
+                />
                 <Button title='Modal'
                     onPress={()=> {
                         this.props.navigator.showModal({
