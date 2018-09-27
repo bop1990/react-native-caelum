@@ -1,7 +1,6 @@
 import { AsyncStorage } from 'react-native';
-import Notificacao from '../api/Notificacao';
 
-const uri = 'https://instalura-api.herokuapp.com/api/888';
+const uri = 'https://instalura-api.herokuapp.com/api';
 
 export default class InstaluraFetchService{
 
