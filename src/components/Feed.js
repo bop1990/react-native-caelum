@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, View } from 'react-native';
 import Post from './Post';
+import InstaluraFetchService from './../services/InstaluraFetchService';
 
 const width = Dimensions.get('screen').width;
 
@@ -20,21 +21,10 @@ export default class Feed extends Component {
     // }
 
     componentDidMount(){
-        const uri = 'https://instalura-api.herokuapp.com/api/fotos';
+         // this.apiFetch();
 
-        AsyncStorage.getItem('token')
-            .then(token => {
-                return{
-                    headers: new Headers({
-                        'X-AUTH-TOKEN': token
-                    })
-                }
-            })
-            .then(requestInfo => fetch(uri, requestInfo))
-            .then(resposta => resposta.json())
+        InstaluraFetchService.get('/fotos')
             .then(json => this.setState({fotos: json}));
-        
-        // this.apiFetch();
     }
 
     like = (idFoto) => {
@@ -66,18 +56,7 @@ export default class Feed extends Component {
                 this.setState({fotos});
             });
 
-        const uri = `https://instalura-api.herokuapp.com/api/fotos/${idFoto}/like`;
-
-        AsyncStorage.getItem('token')
-            .then(token => {
-                return{
-                    method: 'POST',
-                    headers: new Headers({
-                        'X-AUTH-TOKEN': token
-                    })
-                }
-            })
-            .then(requestInfo => fetch(uri, requestInfo));
+        InstaluraFetchService.post(`/fotos/${idFoto}/like`);
     }
 
     adicionaComentario = (idFoto, valorComentario, inputComentario) =>{
@@ -86,23 +65,11 @@ export default class Feed extends Component {
 
         const foto = this.buscaPorId(this.state.fotos, idFoto);
 
-        const uri = `https://instalura-api.herokuapp.com/api/fotos/${idFoto}/comment`;
+        // const comentario = {
+        //     texto: valorComentario
+        // }
 
-        AsyncStorage.getItem('token')
-            .then(token => {
-                return{
-                    method: 'POST',
-                    body: JSON.stringify({
-                        texto: valorComentario
-                    }),
-                    headers: new Headers({
-                        'Content-type': 'application/json',
-                        'X-AUTH-TOKEN': token
-                    })
-                }
-            })
-            .then(requestInfo => fetch(uri, requestInfo))
-            .then(resposta => resposta.json())
+        InstaluraFetchService.post(`/fotos/${idFoto}/comment`, valorComentario)
             .then(comentario => [...foto.comentarios, comentario])
             .then(novaLista => {
                 const fotoAtualizada = {
@@ -115,13 +82,6 @@ export default class Feed extends Component {
         
                 inputComentario.clear();
             })
-
-        // const novaLista = [...foto.comentarios,{
-        //     id: valorComentario,
-        //     login: 'meuUsuario',
-        //     texto: valorComentario
-        // }];
-       
     }
 
     buscaPorId(fotos, idFoto){
