@@ -10,6 +10,7 @@ import AluraLingua from './src/components/AluraLingua';
 
 Navigation.registerComponent('Login', () => Login);
 Navigation.registerComponent('Feed', () => Feed);
+Navigation.registerComponent('PerfilUsuario', () => Feed);
 Navigation.registerComponent('AluraLingua', () => AluraLingua);
 
 AsyncStorage.getItem('token')

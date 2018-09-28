@@ -44,4 +44,30 @@ export default class InstaluraFetchService{
             .then(requestInfo => fetch(url, requestInfo))
             .then(resposta => resposta.json());
     }
+
+
+    // static makeRequest(recurso, method='GET', dados){
+    //     const url = uri + recurso;
+        
+    //     if(dados === '')
+    //         dados={};
+
+    //     AsyncStorage.getItem('token')
+    //         .then(token => {
+    //             return{
+    //                 method: method,
+    //                 body: JSON.stringify({
+    //                     texto: dados
+    //                 }),
+    //                 headers: new Headers({
+    //                     'Content-type': 'application/json',
+    //                     'X-AUTH-TOKEN': token
+    //                 })
+    //             }
+    //         })
+    //         .then(requestInfo => fetch(url, requestInfo))
+    //         .then(resposta => resposta.json()); 
+
+    // }
+
 }

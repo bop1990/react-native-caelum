@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, View } from 'react-native';
+import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, ScrollView } from 'react-native';
 import Post from './Post';
 import InstaluraFetchService from './../services/InstaluraFetchService';
 import Notificacao from '../api/Notificacao';
@@ -95,7 +95,7 @@ export default class Feed extends Component {
     render(){
 
         return(
-            <View>
+            <ScrollView>
                 <Button title='Logout'
                     onPress={()=> {
                         AsyncStorage.removeItem('token');
@@ -123,7 +123,7 @@ export default class Feed extends Component {
                     />
                     }
                 />
-            </View>
+            </ScrollView>
         );
     }
 }
