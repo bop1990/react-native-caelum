@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, ScrollView, View} from 'react-native';
 import Post from './Post';
 import InstaluraFetchService from './../services/InstaluraFetchService';
 import Notificacao from '../api/Notificacao';
@@ -13,6 +13,7 @@ export default class Feed extends Component {
         super();
         this.state = {
             fotos: [],
+            falhou: false
         }
     }
 
@@ -23,16 +24,27 @@ export default class Feed extends Component {
     // }
 
     componentDidMount(){
-         // this.apiFetch();
+         this.carregaTela();
+    }
+
+    carregaTela(){
+        // this.apiFetch();
 
         let uri = '/fotos';
 
-        if(this.props.usuario)
+        if(this.props && this.props.usuario)
             uri = `/public/fotos/${this.props.usuario}`;
 
-        InstaluraFetchService.get('/fotos')
-            .then(json => this.setState({fotos: json}))
-            .catch(e => Notificacao.exibe('','Opsss... algo deu errado'));
+        InstaluraFetchService.get(uri)
+            .then(json => {
+                this.setState({fotos: json});
+                this.telaInicial();
+            })
+            .catch(e => {
+                this.setState({falhou: true});
+                this.telaInicial();                
+                Notificacao.exibe('','Opsss... algo deu errado');
+            });
     }
 
     like = (idFoto) => {
@@ -117,40 +129,52 @@ export default class Feed extends Component {
             return <HeaderUsuario {...this.props} />;
     }
 
-    render(){
 
+    telaInicial(){
+        if(this.state.falhou){
+            return <Button title='Recarrgar' 
+                onPress={this.carregaTela}
+            />; 
+        }
+
+        return <ScrollView>
+            <Button title='Logout'
+                onPress={()=> {
+                    AsyncStorage.removeItem('token');
+                    AsyncStorage.removeItem('usuario');
+                    this.props.navigator.resetTo({
+                        screen: 'Login',
+                        title: 'Login'
+                    });
+                }}
+            />
+            <Button title='Modal'
+                onPress={()=> {
+                    this.props.navigator.showModal({
+                        screen: 'AluraLingua',
+                        title: 'AluraLingua'
+                    })
+                }}
+            />
+            {this.exibeHeader()}
+            <FlatList style={styles.container}
+                keyExtractor={item => String(item.id)}
+                data={this.state.fotos}
+                renderItem={ ({item}) => 
+                <Post foto={item} likeCallback={this.like}
+                    comentarioCallback={this.adicionaComentario}
+                    verPerfilCallback={this.verPerfilUsuario}
+                />
+                }
+            />
+        </ScrollView>;
+    }
+
+    render(){
         return(
-            <ScrollView>
-                <Button title='Logout'
-                    onPress={()=> {
-                        AsyncStorage.removeItem('token');
-                        AsyncStorage.removeItem('usuario');
-                        this.props.navigator.resetTo({
-                            screen: 'Login',
-                            title: 'Login'
-                        });
-                    }}
-                />
-                <Button title='Modal'
-                    onPress={()=> {
-                        this.props.navigator.showModal({
-                            screen: 'AluraLingua',
-                            title: 'AluraLingua'
-                        })
-                    }}
-                />
-                {this.exibeHeader()}
-                <FlatList style={styles.container}
-                    keyExtractor={item => String(item.id)}
-                    data={this.state.fotos}
-                    renderItem={ ({item}) => 
-                    <Post foto={item} likeCallback={this.like}
-                        comentarioCallback={this.adicionaComentario}
-                        verPerfilCallback={this.verPerfilUsuario}
-                    />
-                    }
-                />
-            </ScrollView>
+            <View>
+                {this.telaInicial()}
+            </View>
         );
     }
 }
