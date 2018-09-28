@@ -3,6 +3,7 @@ import { AsyncStorage, Button, Dimensions, FlatList, StyleSheet, ScrollView } fr
 import Post from './Post';
 import InstaluraFetchService from './../services/InstaluraFetchService';
 import Notificacao from '../api/Notificacao';
+import HeaderUsuario from './HeaderUsuario';
 
 const width = Dimensions.get('screen').width;
 
@@ -23,6 +24,11 @@ export default class Feed extends Component {
 
     componentDidMount(){
          // this.apiFetch();
+
+        let uri = '/fotos';
+
+        if(this.props.usuario)
+            uri = `/public/fotos/${this.props.usuario}`;
 
         InstaluraFetchService.get('/fotos')
             .then(json => this.setState({fotos: json}))
@@ -92,6 +98,25 @@ export default class Feed extends Component {
         return fotos.map(foto => foto.id === fotoAtualizada.id ? fotoAtualizada: foto);
     }
 
+    verPerfilUsuario = (idFoto) => {
+        const foto = this.buscaPorId(this.state.fotos, idFoto);
+        this.props.navigator.push({
+            screen: 'Feed',
+            title: foto.loginUsuario,
+            backButtonTitle: '',
+            passProps:{
+                usuario: foto.loginUsuario,
+                fotoDePerfil: foto.urlPerfil,
+                posts: this.state.fotos.length
+            }
+        })
+    }
+
+    exibeHeader(){
+        if(this.props.usuario)
+            return <HeaderUsuario {...this.props} />;
+    }
+
     render(){
 
         return(
@@ -114,12 +139,14 @@ export default class Feed extends Component {
                         })
                     }}
                 />
+                {this.exibeHeader()}
                 <FlatList style={styles.container}
                     keyExtractor={item => String(item.id)}
                     data={this.state.fotos}
                     renderItem={ ({item}) => 
                     <Post foto={item} likeCallback={this.like}
                         comentarioCallback={this.adicionaComentario}
+                        verPerfilCallback={this.verPerfilUsuario}
                     />
                     }
                 />
